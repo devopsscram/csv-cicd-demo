@@ -1,11 +1,15 @@
-def call(Map config) {
+def call(csvFile,id,name,dept){
 
-    def csvFile = config.csvFile
-    def rowData = config.rowData
+    def exists = sh(
+        script: "grep '^${id},' ${csvFile}",
+        returnStatus: true
+    )
+
+    if(exists == 0){
+        error("Employee ID already exists")
+    }
 
     sh """
-        echo '${rowData}' >> ${csvFile}
+       echo '${id},${name},${dept}' >> ${csvFile}
     """
-
-    echo "Row appended successfully"
 }
