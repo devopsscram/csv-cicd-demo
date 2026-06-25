@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        GIT_REPO = 'https://github.com/your-user/csv-cicd-demo.git'
+        GIT_REPO = 'https://github.com/devopsscram/csv-cicd-demo.git'
         GIT_BRANCH = 'main'
     }
 
