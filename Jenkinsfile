@@ -20,12 +20,12 @@ pipeline {
             steps {
                 sh '''
                     DATE=$(date +"%Y-%m-%d")
-                    ID=$(($(tail -n 1 data.csv | cut -d',' -f1)+1))
+                    ID=$(($(tail -n 1 employees.csv | cut -d',' -f1)+1))
 
-                    echo "$ID,JenkinsUser,$DATE" >> data.csv
+                    echo "$ID,JenkinsUser,$DATE" >> employees.csv
 
                     echo "Updated CSV:"
-                    cat data.csv
+                    cat employees.csv
                 '''
             }
         }
@@ -36,7 +36,7 @@ pipeline {
                     git config user.name "jenkins"
                     git config user.email "jenkins@example.com"
 
-                    git add data.csv
+                    git add employees.csv
 
                     git diff --cached --quiet || \
                     git commit -m "Auto update CSV from Jenkins build ${BUILD_NUMBER}"
