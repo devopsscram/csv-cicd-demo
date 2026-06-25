@@ -33,8 +33,8 @@ pipeline {
         stage('Commit and Push') {
             steps {
                 sh '''
-                    git config user.name "jenkins"
-                    git config user.email "jenkins@example.com"
+                    git config user.name "devopsscram"
+                    git config user.email ""himalayanscram9@gmail.com"
 
                     git add employees.csv
 
