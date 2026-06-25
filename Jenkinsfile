@@ -1,84 +1,48 @@
-@Library('jenkins-shared-library@main') _
-
 pipeline {
-
     agent any
 
-    parameters {
-
-        string(
-            name: 'EMP_ID',
-            defaultValue: '',
-            description: 'Employee ID'
-        )
-
-        string(
-            name: 'EMP_NAME',
-            defaultValue: '',
-            description: 'Employee Name'
-        )
-
-        string(
-            name: 'DEPARTMENT',
-            defaultValue: '',
-            description: 'Department'
-        )
-    }
-
     environment {
-
-        CSV_FILE = "data/employees.csv"
-
+        GIT_REPO = 'https://github.com/your-user/csv-cicd-demo.git'
+        GIT_BRANCH = 'main'
     }
 
     stages {
 
         stage('Checkout') {
-
             steps {
-
-                checkout scm
-
+                git branch: "${GIT_BRANCH}",
+                    credentialsId: 'github-creds',
+                    url: "${GIT_REPO}"
             }
         }
 
-        stage('Append CSV') {
-
+        stage('Update CSV') {
             steps {
+                sh '''
+                    DATE=$(date +"%Y-%m-%d")
+                    ID=$(($(tail -n 1 data.csv | cut -d',' -f1)+1))
 
-                appendCsv(
-                    env.CSV_FILE,
-                    params.EMP_ID,
-                    params.EMP_NAME,
-                    params.DEPARTMENT
-                )
+                    echo "$ID,JenkinsUser,$DATE" >> data.csv
 
+                    echo "Updated CSV:"
+                    cat data.csv
+                '''
             }
         }
 
-        stage('Commit Changes') {
-
+        stage('Commit and Push') {
             steps {
+                sh '''
+                    git config user.name "jenkins"
+                    git config user.email "jenkins@example.com"
 
-                withCredentials([
-                    usernamePassword(
-                        credentialsId: 'github-creds',
-                        usernameVariable: 'GIT_USER',
-                        passwordVariable: 'GIT_PASS'
-                    )
-                ]) {
+                    git add data.csv
 
-                    sh '''
-                        git config user.email "jenkins@company.com"
-                        git config user.name "Jenkins"
+                    git diff --cached --quiet || \
+                    git commit -m "Auto update CSV from Jenkins build ${BUILD_NUMBER}"
 
-                        git add .
-
-                        git commit -m "Added new employee record" || true
-
-                        git push https://${GIT_USER}:${GIT_PASS}@github.com/USERNAME/csv-cicd-demo.git HEAD:main
-                    '''
-                }
+                    git push origin ${GIT_BRANCH}
+                '''
             }
         }
     }
