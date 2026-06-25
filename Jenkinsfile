@@ -4,6 +4,7 @@ pipeline {
     environment {
         GIT_REPO = 'https://github.com/devopsscram/csv-cicd-demo.git'
         GIT_BRANCH = 'main'
+        
     }
 
     stages {
@@ -31,8 +32,16 @@ pipeline {
         }
 
         stage('Commit and Push') {
-            steps {
-                sh '''
+            withCredentials([
+                usernamePassword(
+                    credentialsId: 'github-creds',
+                    usernameVariable: 'devopsscram'
+                    passwordVariable: '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'
+                )
+            ]) 
+            {
+                steps {
+                    sh '''
                     git config user.name "devopsscram"
                     git config user.email ""himalayanscram9@gmail.com"
 
@@ -40,8 +49,7 @@ pipeline {
 
                     git diff --cached --quiet || \
                     git commit -m "Auto update CSV from Jenkins build ${BUILD_NUMBER}"
-
-                    git push origin ${GIT_BRANCH}
+                    git push https://${GIT_USER}:${GIT_TOKEN}@github.com/devopsscram/csv-cicd-demo.git HEAD:main
                 '''
             }
         }
